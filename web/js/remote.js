@@ -3,6 +3,7 @@ import { warriors, actors, chats, moodOf, acceptsRemote } from './store.js'
 import { themeOf } from './themes.js'
 import { showBoardNote } from './notes.js'
 import { esc, shortModel, postJson, $ } from './util.js'
+import { renderMarkdown } from './markdown.js'
 
 const STATE_LABEL = { queued: '전달 대기 중…', sent: '세션에 전달됨', started: '', failed: '전달 실패' }
 const FOCUS_WORD = {
@@ -36,9 +37,11 @@ export function closeRemote() {
   closeRename(false)
 }
 
+// An answer is Markdown, rendered as the terminal shows it; what the person typed and the notices stay literal.
 const messageHtml = row => {
   const status = row.via === 'remote' && STATE_LABEL[row.state] ? `<span class="st">${esc(STATE_LABEL[row.state])}${row.error ? ` · ${esc(row.error)}` : ''}</span>` : ''
-  return `<div class="msg ${row.role}${row.via === 'remote' ? ' remote' : ''}${row.state === 'failed' ? ' failed' : ''}">${esc(row.text)}${status}</div>`
+  const body = row.role === 'assistant' ? `<div class="md">${renderMarkdown(row.text)}</div>` : esc(row.text)
+  return `<div class="msg ${row.role}${row.via === 'remote' ? ' remote' : ''}${row.state === 'failed' ? ' failed' : ''}">${body}${status}</div>`
 }
 
 export function renderRemote(scrollToEnd = false) {
