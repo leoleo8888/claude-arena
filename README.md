@@ -62,6 +62,11 @@ Caveats: permission prompts still appear only in the terminal, so a remote promp
 waits there; the answer shows when the turn ends (no streaming); the server has no auth beyond listening on
 127.0.0.1, so anything on this machine can drive a session through it.
 
+Slash commands: a prompt starting with `/` is queued as a `command` item (`{ command, args }`); the mod runs it
+with `$.command.run` and posts its printed output as a notice row. The mod sends the session's command list
+(`commands` event) on join, `GET /commands/<session>` serves it, and typing `/` in the prompt box lists matching
+commands (Tab takes the first). Commands that open a panel in the terminal come back with "no output".
+
 Renaming: the ✎ button beside the name in the modal posts `{ title }` to `POST /rename/<session>`; the item
 waits in the same inbox (`kind: "rename"`), the mod runs `/rename <title>` through `$.command.run` once the
 session is idle, then reads the recorded title back and sends a `title` event.
