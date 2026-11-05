@@ -28,7 +28,7 @@ export async function openRemote(session) {
     const { rows } = await (await fetch(`/chat/${encodeURIComponent(session)}`)).json()
     if (rows) chats.set(session, rows)
     modal.commands = (await (await fetch(`/commands/${encodeURIComponent(session)}`)).json()).commands || []
-  } catch { /* offline: the stream fills it in */ }
+  } catch (err) { setNote(`대화를 불러오지 못했습니다 (${err.message}). 스트림이 이어지면 채워집니다`) }
   renderRemote(true)
   $('#rmText').focus()
 }

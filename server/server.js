@@ -23,7 +23,19 @@ arena.subscribe(message => {
   if (message.kind !== 'chat' && message.kind !== 'remote') store.saveSoon(arena.ledger)
   live.relay(message)
 })
-setInterval(() => arena.sweep(), SWEEP_MS).unref()
+const sweeper = setInterval(() => arena.sweep(), SWEEP_MS)
+sweeper.unref()
+
+/** Ctrl+C or a service stop: write the ledger now (the debounced save may be pending), close, exit. */
+function shutdown() {
+  clearInterval(sweeper)
+  store.saveNow(arena.ledger)
+  server.close(() => process.exit(0))
+  setTimeout(() => process.exit(0), 1000).unref()   // open event streams keep close() waiting; do not
+}
+process.on('SIGINT', shutdown)
+process.on('SIGTERM', shutdown)
+process.on('unhandledRejection', err => console.error('unhandled rejection', err))
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost')

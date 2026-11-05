@@ -1,7 +1,7 @@
 # bot-monitor — 작업 규칙
 
 Gladiator Yard: 모든 Claude Code 세션이 한 명의 전사로 나타나는 로컬 2D 훈련장. 구조는 README의 Layout 절을 따른다.
-서버(`server/`)는 node:http만 쓰는 ESM, 페이지(`web/js/`)는 빌드 없는 ES 모듈, mod(`~/.claude/mods/arena-link`)는 TypeScript 한 파일.
+서버(`server/`)는 node:http만 쓰는 ESM, 페이지(`web/js/`)는 빌드 없는 ES 모듈, mod(`mod/arena-link`, settings.json에 경로로 등록)는 TypeScript 한 파일.
 
 ## 클린코드 기준 (모든 변경에 적용)
 
@@ -13,7 +13,7 @@ Gladiator Yard: 모든 Claude Code 세션이 한 명의 전사로 나타나는 �
 6. **중복은 두 번째에 바로 합친다.** 같은 계산이 두 곳에 생기면 도우미로 뽑는다(예: vitals 계산, PowerShell 실행).
 7. **주석은 "왜"만.** 무엇을 하는지는 이름이 말하게 하고, 이유·제약·출처(역사적 사실의 전거 포함)만 적는다.
 8. **에러는 한 경로로.** 서버는 `HttpError`를 던지고 `server.js`가 상태 코드로 바꾼다. 페이지는 실패를 삼키지 말고 `setNote`/`showBoardNote`로 사용자에게 보인다.
-9. **mod는 한 파일 유지.** 엔진의 모듈 로딩 방식이 확인되기 전에는 `hooks/register.ts` 하나에 섹션 주석으로 구역을 나눈다. 변경 후 `tsc -p .`와 `claude plugin validate`를 통과시키고 `~/.claude/mods/arena-link`에 복사한다.
+9. **mod는 한 파일 유지.** 엔진의 모듈 로딩 방식이 확인되기 전에는 `hooks/register.ts` 하나에 섹션 주석으로 구역을 나눈다. 변경 후 `tsc -p mod/arena-link`와 `claude plugin validate mod/arena-link`를 통과시킨다. 이 파일은 300줄 규칙의 예외다(현재 350줄 안팎): 엔진이 형제 파일 import를 지원한다고 확인되면 그때 나눈다.
 10. **의존성은 추가하지 않는다.** 런타임 의존성 0을 유지한다. 개발 의존성은 ESLint뿐이다.
 
 ## 변경 전후 확인 (매번)
@@ -30,4 +30,5 @@ npm run lint    # ESLint, 경고 0이어야 함
 - **기능 3개를 추가할 때마다 한 번**, 또는 어떤 파일이 **300줄을 넘으면** 즉시 리팩토링 턴을 가진다. 기능을 섞지 않고 리팩토링만 하는 턴으로 분리한다.
 - 리팩토링 턴의 순서: (1) 사용 언어의 최신 모범 사례를 검색해 기준을 다시 확인 → (2) 위 10개 기준으로 코드를 훑어 위반 목록 작성 → (3) 테스트·린트·시나리오 확인이 통과하는 상태를 유지하며 하나씩 고침 → (4) README Layout 절과 이 문서를 현행화.
 - 리팩토링 중 발견한 버그는 고치되, 동작 변경은 보고에 따로 적는다.
-- 현재 가장 큰 파일: `web/js/render.js`, `server/arena.js`, `hooks/register.ts`. 이들이 300줄에 가까워지면 먼저 나눈다.
+- 현재 가장 큰 파일: `mod/arena-link/hooks/register.ts`(예외), `web/js/render.js`, `server/arena.js`. 뒤의 둘이 300줄에 가까워지면 먼저 나눈다.
+- 서버는 SIGINT/SIGTERM에서 원장을 즉시 저장하고 닫는다. 새 I/O 코드도 종료 경로에 정리를 더한다.

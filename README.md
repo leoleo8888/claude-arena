@@ -188,8 +188,10 @@ Page (`web/`, ES modules, no build step):
 
 - `config.js` numbers and colors · `util.js` pure helpers · `store.js` the single source of truth (warriors, actors, chats, feed)
 - `layout.js` posts, scoreboards, routes and hit boxes · `tiers.js` growing and shrinking the yard · `floor.js` the painted background
-- `sprites.js` glyph art · `themes.js` the six arenas · `actor.js` one warrior's walk and effects · `render.js` the frame loop
-- `panels.js` roster, battle log, hall of fame · `remote.js` the modal · `input.js` mouse · `stream.js` the event stream · `main.js` wiring
+- `sprites.js` glyph art · `themes.js` the six arenas and their casts · `casting.js` which foe steps out · `fightstyles.js` how each arena fights
+- `actor.js` one warrior's walk and effects · `render.js` the frame loop · `fireworks.js` quest-complete fireworks · `notes.js` canvas toasts
+- `panels.js` roster, battle log, hall of fame, the panel fold · `remote.js` the modal · `markdown.js` answers as Markdown with code highlighting
+- `input.js` mouse · `stream.js` the event stream · `main.js` wiring
 - `window.yard` is a small debug handle for the console and headless tests; the page does not use it
 
 Codex (`codex-link/`): `hook.mjs` the hook forwarder (pure `eventsFor` + a post) · `daemon.mjs` heartbeats, transcript vitals, leave · `shared.mjs` lock and post helpers · `scripts/codex-install.mjs` the hooks.json merge

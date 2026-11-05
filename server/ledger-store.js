@@ -19,4 +19,10 @@ export class LedgerStore {
     clearTimeout(this.timer)
     this.timer = setTimeout(() => fs.writeFile(this.file, JSON.stringify(ledger, null, 2), () => {}), SAVE_DELAY_MS)
   }
+
+  /** For shutdown: write synchronously so nothing pending is lost. */
+  saveNow(ledger) {
+    clearTimeout(this.timer)
+    try { fs.writeFileSync(this.file, JSON.stringify(ledger, null, 2)) } catch (err) { console.error('ledger save failed', err) }
+  }
 }
