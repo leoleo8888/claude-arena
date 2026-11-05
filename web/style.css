@@ -91,3 +91,11 @@ aside { width: 310px; flex: none; display: flex; flex-direction: column; gap: 10
 .md table { border-collapse: collapse; margin: 6px 0; font-size: 11px } .md th, .md td { border: 1px solid var(--line); padding: 2px 8px; text-align: left } .md th { color: var(--warn) }
 .md hr { border: 0; border-top: 1px solid var(--line); margin: 8px 0 }
 .md a { color: #8fd3ff } .md strong { color: var(--text) } .md em { color: var(--dim); font-style: italic }
+
+/* slash commands in the remote: the command row, and the suggestion list over the prompt box */
+.msg.cmd { font-family: inherit; background: #1f2a1f; border: 1px dashed var(--ok); color: var(--ok) }
+#rmSuggest { margin: 0 14px 6px; border: 1px solid var(--line); border-radius: 6px; background: #0b0e12; max-height: 180px; overflow: auto }
+#rmSuggest[hidden] { display: none }
+#rmSuggest button { display: flex; gap: 10px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); color: var(--text); font: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer }
+#rmSuggest button:last-child { border-bottom: 0 } #rmSuggest button:hover { background: var(--panel) }
+#rmSuggest b { color: var(--warn); font-weight: normal; min-width: 120px } #rmSuggest span { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }

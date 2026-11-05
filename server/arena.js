@@ -108,6 +108,12 @@ const HANDLERS = {
     return SILENT
   },
 
+  // the slash commands the session can run, for the page's autocomplete
+  commands(arena, warrior, event) {
+    arena.remote.setCommands(event.session, event.commands)
+    return SILENT
+  },
+
   leave(arena, warrior, event, now) {
     warrior.status = 'gone'; warrior.pose = 'walk'; warrior.enemy = null; warrior.squires = []
     arena.ledgerFor(warrior.cwd).lastSeen = now

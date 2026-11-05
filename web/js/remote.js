@@ -14,8 +14,9 @@ const FOCUS_WORD = {
 }
 const NOTE_MS = 5000, FLASH_MS = 700
 
-const modal = { session: null, note: null }   // note: a transient line under the conversation that re-renders must not wipe
+const modal = { session: null, note: null, commands: [] }   // note: a transient line under the conversation that re-renders must not wipe
 const isEnter = ev => ev.key === 'Enter' && !ev.isComposing && ev.keyCode !== 229
+const SUGGESTIONS_MAX = 8
 
 export const setNote = (text, ms = NOTE_MS) => { modal.note = { text, until: Date.now() + ms }; renderRemote() }
 
@@ -26,9 +27,31 @@ export async function openRemote(session) {
   try {
     const { rows } = await (await fetch(`/chat/${encodeURIComponent(session)}`)).json()
     if (rows) chats.set(session, rows)
+    modal.commands = (await (await fetch(`/commands/${encodeURIComponent(session)}`)).json()).commands || []
   } catch { /* offline: the stream fills it in */ }
   renderRemote(true)
   $('#rmText').focus()
+}
+
+// ---- slash commands: "/" at the start of the prompt box lists what the session can run; Tab takes the first match
+function suggestionsFor(value) {
+  const match = /^\/([\w:-]*)$/.exec(value)
+  if (!match) return []
+  const typed = match[1].toLowerCase()
+  return modal.commands.filter(c => c.name.toLowerCase().startsWith(typed)).slice(0, SUGGESTIONS_MAX)
+}
+
+function renderSuggestions() {
+  const box = $('#rmSuggest'), list = suggestionsFor($('#rmText').value)
+  box.hidden = list.length === 0
+  box.innerHTML = list.map(c => `<button type="button" data-cmd="${esc(c.name)}"><b>/${esc(c.name)}</b> <span>${esc(c.description)}</span></button>`).join('')
+}
+
+function takeSuggestion(name) {
+  const textarea = $('#rmText')
+  textarea.value = `/${name} `
+  $('#rmSuggest').hidden = true
+  textarea.focus()
 }
 
 export function closeRemote() {
@@ -41,7 +64,8 @@ export function closeRemote() {
 const messageHtml = row => {
   const status = row.via === 'remote' && STATE_LABEL[row.state] ? `<span class="st">${esc(STATE_LABEL[row.state])}${row.error ? ` · ${esc(row.error)}` : ''}</span>` : ''
   const body = row.role === 'assistant' ? `<div class="md">${renderMarkdown(row.text)}</div>` : esc(row.text)
-  return `<div class="msg ${row.role}${row.via === 'remote' ? ' remote' : ''}${row.state === 'failed' ? ' failed' : ''}">${body}${status}</div>`
+  const kind = row.kind === 'command' ? ' cmd' : ''
+  return `<div class="msg ${row.role}${row.via === 'remote' ? ' remote' : ''}${kind}${row.state === 'failed' ? ' failed' : ''}">${body}${status}</div>`
 }
 
 export function renderRemote(scrollToEnd = false) {
@@ -68,6 +92,7 @@ export async function sendRemote() {
   const textarea = $('#rmText'), text = textarea.value.trim()
   if (!modal.session || !text || textarea.disabled) return
   textarea.value = ''
+  $('#rmSuggest').hidden = true
   try {
     const res = await postJson(`/remote/${encodeURIComponent(modal.session)}`, { text })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -133,7 +158,12 @@ export function initRemote() {
   $('#remote').addEventListener('click', ev => { if (ev.target === $('#remote')) closeRemote() })
   document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && modal.session) closeRemote() })
   $('#rmSend').addEventListener('click', sendRemote)
-  $('#rmText').addEventListener('keydown', ev => { if (isEnter(ev) && !ev.shiftKey) { ev.preventDefault(); sendRemote() } })
+  $('#rmText').addEventListener('keydown', ev => {
+    if (isEnter(ev) && !ev.shiftKey) { ev.preventDefault(); sendRemote() }
+    else if (ev.key === 'Tab') { const first = suggestionsFor($('#rmText').value)[0]; if (first) { ev.preventDefault(); takeSuggestion(first.name) } }
+  })
+  $('#rmText').addEventListener('input', renderSuggestions)
+  $('#rmSuggest').addEventListener('mousedown', ev => { const b = ev.target.closest('button[data-cmd]'); if (b) { ev.preventDefault(); takeSuggestion(b.dataset.cmd) } })
   $('#rmFocus').addEventListener('click', () => focusTerminal(modal.session))
   $('#rmRename').addEventListener('click', openRename)
   $('#rmNameInput').addEventListener('keydown', ev => {

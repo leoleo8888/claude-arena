@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { Arena, HEARTBEAT_REST_MS, HEARTBEAT_LEAVE_MS, acceptsRemote } from './arena.js'
 import { levelOf, monsterFor } from './monsters.js'
-import { CHAT_ROWS } from './remote-desk.js'
+import { CHAT_ROWS, parseCommand } from './remote-desk.js'
 
 test('join, fight, leave keeps xp in the ledger by project', () => {
   const a = new Arena()
@@ -162,4 +162,23 @@ test('a codex session is a warrior too, but the remote is for claude sessions on
   assert.equal(acceptsRemote(a.warriors.get('cl')), true)
   a.apply({ type: 'fight', session: 'cx', tool: 'shell', phase: 'start', target: 'npm test' })
   assert.equal(a.warriors.get('cx').enemy.name, 'Goblin')   // codex's shell tool
+})
+
+test('a slash command typed on the page is queued as a command item; the session lists what it can run', () => {
+  const a = new Arena()
+  a.apply({ type: 'join', session: 'c', cwd: 'C:/work/api' })
+  a.apply({ type: 'commands', session: 'c', commands: [{ name: 'compact', description: 'Compact the conversation' }, { name: '', description: 'x' }, 'junk'] })
+  assert.deepEqual(a.remote.commandsOf('c'), [{ name: 'compact', description: 'Compact the conversation' }])
+  const row = a.remote.post('c', '/compact  요약 위주로 ')
+  assert.equal(row.kind, 'command')
+  assert.equal(row.text, '/compact  요약 위주로')
+  a.remote.post('c', '그냥 글')
+  const items = a.remote.take('c')
+  assert.deepEqual(items.map(i => i.kind), ['command', 'prompt'])
+  assert.equal(items[0].command, 'compact')
+  assert.equal(items[0].args, '요약 위주로')
+  assert.equal(parseCommand('/ not-a-command'), null)
+  assert.deepEqual(parseCommand('/mcp__tools:list'), { command: 'mcp__tools:list', args: '' })
+  a.apply({ type: 'leave', session: 'c' })
+  assert.deepEqual(a.remote.commandsOf('c'), [])
 })

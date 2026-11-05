@@ -39,6 +39,10 @@ export function routes({ arena, live }) {
       const { session } = warriorOf(arena, params)
       sendJson(res, 200, { session, rows: arena.remote.rowsOf(session) })
     }],
+    ['GET', '/commands/:session', ({ res, params }) => {
+      const { session } = warriorOf(arena, params)
+      sendJson(res, 200, { session, commands: arena.remote.commandsOf(session) })
+    }],
     ['POST', '/remote/:session', async ({ req, res, params }) => {
       const { session } = remoteWarriorOf(arena, params)
       const body = await readJson(req, PROMPT_BODY_MAX)

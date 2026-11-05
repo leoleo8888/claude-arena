@@ -10,14 +10,32 @@ const PENDING_STATES = new Set(['queued', 'sent'])
 
 export const cleanTitle = title => (typeof title === 'string' ? title.trim().replace(/\s+/g, ' ').slice(0, TITLE_MAX) : '')
 
+const COMMAND_RE = /^\/([a-zA-Z][\w:-]*)\s*([\s\S]*)$/
+const COMMANDS_MAX = 300
+/** `/compact keep the plan` → { command: 'compact', args: 'keep the plan' }; null for anything that is not a slash command. */
+export function parseCommand(text) {
+  const match = COMMAND_RE.exec(text)
+  return match ? { command: match[1], args: match[2].trim() } : null
+}
+
 export class RemoteDesk {
   /** @param emit (kind, payload) => void: 'chat' rows for the page, 'remote' when an inbox item arrives */
   constructor(emit) {
     this.emit = emit
-    this.rows = new Map()     // session -> [{ id, t, role, text, via?, state?, error? }]
-    this.inbox = new Map()    // session -> [{ id, kind: 'prompt' | 'rename', text }]
+    this.rows = new Map()     // session -> [{ id, t, role, text, via?, state?, kind?, error? }]
+    this.inbox = new Map()    // session -> [{ id, kind: 'prompt' | 'command' | 'rename', text, command?, args? }]
+    this.commands = new Map() // session -> [{ name, description }] the slash commands that session can run
     this.seq = 0
   }
+
+  setCommands(session, list) {
+    if (!Array.isArray(list)) return
+    this.commands.set(session, list.slice(0, COMMANDS_MAX)
+      .filter(c => c && typeof c.name === 'string' && c.name !== '')
+      .map(c => ({ name: c.name.slice(0, 60), description: String(c.description || '').slice(0, 160) })))
+  }
+
+  commandsOf(session) { return this.commands.get(session) || [] }
 
   rowsOf(session) {
     if (!this.rows.has(session)) this.rows.set(session, [])
@@ -29,7 +47,7 @@ export class RemoteDesk {
     if (!row || !CHAT_ROLES.has(row.role) || typeof row.text !== 'string') return null
     const text = row.text.length > CHAT_TEXT_MAX ? `${row.text.slice(0, CHAT_TEXT_MAX)}\n…(${row.text.length - CHAT_TEXT_MAX}자 생략)` : row.text
     const made = { id: ++this.seq, t: typeof row.t === 'number' ? row.t : now, role: row.role, text }
-    if (row.via === 'remote') { made.via = 'remote'; made.state = row.state || 'queued' }
+    if (row.via === 'remote') { made.via = 'remote'; made.state = row.state || 'queued'; if (row.kind === 'command') made.kind = 'command' }
     return made
   }
 
@@ -71,12 +89,13 @@ export class RemoteDesk {
     this.emit('chat', { session, row })
   }
 
-  /** A prompt typed on the page: shown at once as a queued user row, handed to the mod on its next pull. */
+  /** A prompt or a slash command typed on the page: shown at once as a queued user row, handed to the mod on its next pull. */
   post(session, text, now = Date.now()) {
     const clean = typeof text === 'string' ? text.trim().slice(0, REMOTE_TEXT_MAX) : ''
     if (clean === '') return null
-    const row = this.add(session, { role: 'user', text: clean, via: 'remote', state: 'queued' }, now)
-    this.enqueue(session, { id: row.id, kind: 'prompt', text: clean })
+    const command = parseCommand(clean)
+    const row = this.add(session, { role: 'user', text: clean, via: 'remote', state: 'queued', kind: command ? 'command' : 'prompt' }, now)
+    this.enqueue(session, command ? { id: row.id, kind: 'command', text: clean, ...command } : { id: row.id, kind: 'prompt', text: clean })
     return row
   }
 
@@ -102,5 +121,5 @@ export class RemoteDesk {
     return items
   }
 
-  drop(session) { this.rows.delete(session); this.inbox.delete(session) }
+  drop(session) { this.rows.delete(session); this.inbox.delete(session); this.commands.delete(session) }
 }

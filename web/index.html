@@ -28,7 +28,8 @@
     <div class="rm-head"><div><b id="rmName"></b><button id="rmRename" class="lnk" title="세션 이름 바꾸기 (/rename)">✎</button><input id="rmNameInput" hidden maxlength="60" placeholder="새 세션 이름 · Enter 적용, Esc 취소"><span id="rmMeta"></span></div><div><button id="rmFocus" class="tg" title="이 세션이 열린 터미널 창을 앞으로 가져옵니다">🖥 터미널</button> <button id="rmClose" class="tg" title="닫기 (Esc)">✕</button></div></div>
     <div id="rmRows"></div>
     <div id="rmTyping"></div>
-    <div class="rm-foot"><textarea id="rmText" rows="2" placeholder="이 세션에 보낼 지시… (Enter 전송, Shift+Enter 줄바꿈)"></textarea><button id="rmSend" class="tg on">보내기</button></div>
+    <div id="rmSuggest" hidden></div>
+    <div class="rm-foot"><textarea id="rmText" rows="2" placeholder="이 세션에 보낼 지시… (Enter 전송, Shift+Enter 줄바꿈, /명령)"></textarea><button id="rmSend" class="tg on">보내기</button></div>
   </div>
 </div>
 <script type="module" src="js/main.js"></script>
