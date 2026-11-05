@@ -7,9 +7,9 @@ import { showToast } from './notes.js'
 
 let shrinkSince = null
 
-export function applyTier(tier) {
+export function applyTier(tier, { quiet = false } = {}) {
   if (tier === layout.tier) return
-  const previous = layout.tier
+  const previous = quiet ? 0 : layout.tier   // quiet: the first snapshot sizing the yard is not an expansion worth a toast
   layout.tier = tier
   placeSlots(tier)
   paintFloor()
@@ -24,9 +24,9 @@ export function applyTier(tier) {
 }
 
 /** Grows right away for `count` sessions; a smaller tier is only noted, and applied by the watch after SHRINK_MS. */
-export function requestTier(count) {
+export function requestTier(count, options = {}) {
   const wanted = tierFor(count)
-  if (wanted > layout.tier) applyTier(wanted)
+  if (wanted > layout.tier) applyTier(wanted, options)
   else if (wanted < layout.tier) { if (shrinkSince == null) shrinkSince = performance.now() }
   else shrinkSince = null
 }

@@ -45,7 +45,7 @@ function onSnapshot(snapshot) {
   const alive = new Set(snapshot.warriors.map(w => w.session))
   for (const warrior of [...warriors.values()]) if (!alive.has(warrior.session)) remove(warrior)
   store.ledger = snapshot.ledger
-  requestTier(snapshot.warriors.length)   // size the yard once, before the warriors walk in
+  requestTier(snapshot.warriors.length, { quiet: true })   // size the yard once, before the warriors walk in
   for (const warrior of snapshot.warriors) upsert(warrior)
   renderPanels()
 }

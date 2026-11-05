@@ -165,7 +165,8 @@ stops, and walk out on `leave`. Squires stand behind the warrior. A scoreboard a
 crawls its warrior's newest battle-log line right to left (green for wins, red for failures); a vacated
 post keeps the last line, dimmed, until the next warrior arrives. The side panels hold the roster
 with elapsed session time, the battle log with one tab per connected session (plus All, where a departed
-session's lines remain), and the hall of fame. The sound button turns on
+session's lines remain), and the hall of fame; the ▸ 패널 button folds all three away so the yard takes the
+whole width (remembered per browser). The sound button turns on
 synthesized effects (swing, kill, hurt, victory, level up, join, leave); the choice is remembered per browser.
 
 ## Layout
