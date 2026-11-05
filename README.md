@@ -10,6 +10,12 @@ session, or raise its terminal window.
 > machine can read your sessions' conversations through it and, for Claude sessions, send them prompts and slash
 > commands. Do not expose the port beyond localhost.
 
+![The yard: five sessions training in their arenas](docs/yard.png)
+
+| A finished turn: fireworks over the yard | The remote: the session's conversation, a prompt box, slash commands |
+|---|---|
+| ![Fireworks when a quest completes](docs/fireworks.png) | ![The remote modal with a Markdown answer](docs/remote.png) |
+
 ```
 npm start            # http://127.0.0.1:4747
 npm test             # unit tests for the arena state

@@ -1,5 +1,5 @@
 // Arena server: POST /event from sessions, SSE /events to browsers, the remote API, static web/ pages.
-// No dependencies. `node server/server.js [port]`  (default 4747, or ARENA_PORT)
+// No dependencies. `node server/server.js [port]`  (default 4747, or ARENA_PORT; ARENA_DATA picks the data folder)
 import http from 'node:http'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -14,7 +14,8 @@ const WEB = path.join(ROOT, 'web')
 const PORT = Number(process.argv[2] || process.env.ARENA_PORT || 4747)
 const SWEEP_MS = 5000
 
-const store = new LedgerStore(path.join(ROOT, 'data', 'ledger.json'))
+const DATA_DIR = process.env.ARENA_DATA || path.join(ROOT, 'data')   // ARENA_DATA: a scratch yard with its own ledger
+const store = new LedgerStore(path.join(DATA_DIR, 'ledger.json'))
 const arena = new Arena(store.load())
 const live = new LiveClients(arena)
 const table = routes({ arena, live })
