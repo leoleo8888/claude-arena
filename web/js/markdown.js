@@ -32,12 +32,39 @@ export function renderMarkdown(text) {
 }
 
 function fence(lines, start, out) {
-  const lang = lines[start].slice(3).trim()
+  const lang = lines[start].slice(3).trim().toLowerCase()
   const body = []
   let i = start + 1
   while (i < lines.length && !FENCE.test(lines[i])) body.push(lines[i++])
-  out.push(`<pre${lang ? ` data-lang="${esc(lang)}"` : ''}><code>${esc(body.join('\n'))}</code></pre>`)
+  out.push(`<div class="codebox"><div class="codebar"><span>${esc(lang || 'code')}</span><button type="button" class="copy" data-copy>복사</button></div><pre><code>${highlight(body.join('\n'), lang)}</code></pre></div>`)
   return Math.min(lines.length, i + 1)
+}
+
+// ---- a light syntax colouring: comments, strings, numbers and keywords, enough to read code at a glance
+const KEYWORDS = new Set(('const let var function return if else for while do switch case break continue new class extends import export from default ' +
+  'async await try catch finally throw typeof instanceof of in null undefined true false this super yield static get set delete void ' +
+  'def lambda pass elif not and or is None True False with as print raise except global nonlocal ' +
+  'fn pub struct impl enum match use mut let trait where type interface implements package func go defer chan select range ' +
+  'then fi done esac local echo exit export source elif').split(' '))
+const HASH_COMMENT_LANGS = new Set(['sh', 'bash', 'zsh', 'shell', 'python', 'py', 'yaml', 'yml', 'toml', 'ps1', 'powershell', 'ruby', 'rb', 'dockerfile', 'makefile', ''])
+const TOKEN = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|(#[^\n]*)|("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)/g
+
+export function highlight(code, lang = '') {
+  const hashComments = HASH_COMMENT_LANGS.has(lang)
+  const slashComments = !hashComments || lang === ''
+  let out = '', last = 0
+  for (const match of code.matchAll(TOKEN)) {
+    const [whole, slashComment, hashComment, string, number, word] = match
+    out += esc(code.slice(last, match.index))
+    last = match.index + whole.length
+    if (slashComment && slashComments) out += `<i class="tc">${esc(whole)}</i>`
+    else if (hashComment && hashComments) out += `<i class="tc">${esc(whole)}</i>`
+    else if (string) out += `<i class="ts">${esc(whole)}</i>`
+    else if (number) out += `<i class="tn">${esc(whole)}</i>`
+    else if (word && KEYWORDS.has(word)) out += `<i class="tk">${esc(whole)}</i>`
+    else out += esc(whole)
+  }
+  return out + esc(code.slice(last))
 }
 
 function table(lines, start, out) {

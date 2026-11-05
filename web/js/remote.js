@@ -153,7 +153,15 @@ export function onChat(message) {
   if (message.session === modal.session) renderRemote()
 }
 
+async function copyCode(button) {
+  const code = button.closest('.codebox')?.querySelector('code')
+  if (!code) return
+  try { await navigator.clipboard.writeText(code.textContent); button.textContent = '복사됨' } catch { button.textContent = '복사 실패' }
+  setTimeout(() => { button.textContent = '복사' }, 1500)
+}
+
 export function initRemote() {
+  $('#rmRows').addEventListener('click', ev => { const button = ev.target.closest('button[data-copy]'); if (button) copyCode(button) })
   $('#rmClose').addEventListener('click', closeRemote)
   $('#remote').addEventListener('click', ev => { if (ev.target === $('#remote')) closeRemote() })
   document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && modal.session) closeRemote() })
