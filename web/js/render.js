@@ -104,12 +104,14 @@ function drawActor(actor, warrior, now) {
   if (warrior) warrior.squires.forEach((_, i) => drawSprite(ctx, SQUIRE[(frame + i) % 2], SQUIRE_PALETTE, actor.x - 26 - i * 16, actor.y + 14 + (i % 2) * 6, 2, false, 0.95))
   const palette = (warrior && PALETTE_BY_AGENT[warrior.agent]) || HERO_PALETTE
   const mounted = actor.mounted() && pose !== 'rest'
-  const rolling = actor.moving || (actor.enemy && !actor.enemy.dying)
+  // the chariot rolls whenever there is something to do: walking, fighting, or the session thinking between calls
+  const rolling = actor.moving || (actor.enemy && !actor.enemy.dying) || (warrior && warrior.status === 'training')
+  const rideBob = mounted && rolling ? Math.round(Math.sin(now / 110)) : 0   // a bumpy ride, so a thinking charioteer never looks frozen
   const hx = actor.x + lungeOffset(actor, now)   // a ram, a shield bash or a thrust carries the warrior forward for a moment
   if (actor.enemy) drawEnemyStage(ctx, actor, actor.enemy, now)
-  if (mounted) drawMount(ctx, 'chariot', hx, actor.y + 14 * SCALE, 12 * SCALE, SCALE, actor.facingLeft, rolling ? frame : 0, '#8a5a30', 'under')
-  drawSprite(ctx, frames[frameIndex], palette, hx, actor.y + bobY + lift, SCALE, actor.facingLeft, warrior && warrior.status === 'resting' ? 0.7 : 1)
-  if (mounted) drawMount(ctx, 'chariot', hx, actor.y + 14 * SCALE, 12 * SCALE, SCALE, actor.facingLeft, rolling ? frame : 0, '#8a5a30', 'over')
+  if (mounted) drawMount(ctx, 'chariot', hx, actor.y + 14 * SCALE + rideBob, 12 * SCALE, SCALE, actor.facingLeft, rolling ? frame : 0, '#8a5a30', 'under')
+  drawSprite(ctx, frames[frameIndex], palette, hx, actor.y + bobY + lift + rideBob, SCALE, actor.facingLeft, warrior && warrior.status === 'resting' ? 0.7 : 1)
+  if (mounted) drawMount(ctx, 'chariot', hx, actor.y + 14 * SCALE + rideBob, 12 * SCALE, SCALE, actor.facingLeft, rolling ? frame : 0, '#8a5a30', 'over')
   if (actor.enemy) drawEnemy(actor, pose, now)
   drawFightEffects(ctx, actor, now)
   if (warrior) drawNamePlate(actor, warrior, now)
