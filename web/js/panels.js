@@ -87,7 +87,22 @@ export function renderLog() {
   list.scrollTop = list.scrollHeight
 }
 
+const PANELS_KEY = 'yard.panels'
+
+/** Folds or unfolds the side panels; the choice is remembered per browser. */
+function setPanelsHidden(hidden) {
+  document.body.classList.toggle('panels-hidden', hidden)
+  const button = $('#panels')
+  button.textContent = hidden ? '◂ 패널' : '▸ 패널'
+  button.title = hidden ? '우측 패널 펼치기' : '우측 패널 접기'
+  try { localStorage.setItem(PANELS_KEY, hidden ? '1' : '0') } catch { /* private window */ }
+}
+
 export function initPanels() {
+  let hidden = false
+  try { hidden = localStorage.getItem(PANELS_KEY) === '1' } catch { /* storage blocked */ }
+  setPanelsHidden(hidden)
+  $('#panels').addEventListener('click', () => setPanelsHidden(!document.body.classList.contains('panels-hidden')))
   $('#logTabs').addEventListener('click', ev => {
     const button = ev.target.closest('button[data-tab]')
     if (!button) return

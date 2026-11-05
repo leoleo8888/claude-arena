@@ -104,3 +104,7 @@ aside { width: 310px; flex: none; display: flex; flex-direction: column; gap: 10
 #rmSuggest button { display: flex; gap: 10px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); color: var(--text); font: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer }
 #rmSuggest button:last-child { border-bottom: 0 } #rmSuggest button:hover { background: var(--panel) }
 #rmSuggest b { color: var(--warn); font-weight: normal; min-width: 120px } #rmSuggest span { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+
+/* the side panels fold away to give the yard the whole width */
+body.panels-hidden aside { display: none }
+body.panels-hidden canvas { max-width: 1400px }
