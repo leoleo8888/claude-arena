@@ -10,7 +10,8 @@
     "demo": "node scripts/demo.mjs",
     "lint": "eslint .",
     "codex:install": "node scripts/codex-install.mjs",
-    "codex:e2e": "node codex-link/e2e.mjs"
+    "codex:e2e": "node codex-link/e2e.mjs",
+    "pack": "node scripts/pack.mjs"
   },
   "engines": {
     "node": ">=20"
