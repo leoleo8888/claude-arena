@@ -177,9 +177,11 @@ async function flush($: EngineInterface): Promise<void> {
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     let applied = -1
     try { applied = Number((JSON.parse(res.text) as { applied?: number }).applied) } catch { /* not json */ }
-    // Applied nothing although we sent real events: the server lost us. Re-join and replay once.
-    if (applied === 0 && batch.some(b => b.type !== 'join' && b.type !== 'heartbeat')) {
-      await postJson($, '/event', [joinEvent(), vitalsEvent(), ...batch.filter(b => b.type !== 'join')])
+    // Applied nothing: the server was restarted and has forgotten us (a lone heartbeat says so too). Re-join,
+    // replay the batch, and hand the page our conversation again, since the server keeps it in memory only.
+    if (applied === 0 && !batch.some(b => b.type === 'join')) {
+      await postJson($, '/event', [joinEvent(), vitalsEvent(), ...batch])
+      void dumpChat($)
     }
     if (!state.connected) {
       state.connected = true
