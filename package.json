@@ -1,8 +1,8 @@
 {
-  "name": "bot-monitor",
+  "name": "claude-arena",
   "version": "0.1.0",
   "private": true,
-  "description": "Gladiator training yard: a local 2D arena where every Claude Code session is a warrior",
+  "description": "A local 2D pixel-art gladiator yard where every Claude Code or Codex session is a warrior: tool calls are fights, finished turns are victories, and sessions level up per project.",
   "type": "module",
   "scripts": {
     "start": "node server/server.js",
@@ -20,5 +20,11 @@
     "@eslint/js": "^9.17.0",
     "eslint": "^9.17.0",
     "globals": "^15.14.0"
+  },
+  "license": "MIT",
+  "author": "leoleo8888",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leoleo8888/claude-arena.git"
   }
 }

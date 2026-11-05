@@ -1,6 +1,6 @@
 # arena-link
 
-Sends this Claude Code session to the Gladiator Yard (the `bot-monitor` server next to this folder), where every
+Sends this Claude Code session to the Gladiator Yard (the `claude-arena` server next to this folder), where every
 open session is one warrior. This is the source of record: register the folder itself, do not copy it.
 
 Setup, in `~/.claude/settings.json` (read at session start):

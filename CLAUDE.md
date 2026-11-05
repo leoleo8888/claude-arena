@@ -1,4 +1,4 @@
-# bot-monitor — 작업 규칙
+# claude-arena — 작업 규칙
 
 Gladiator Yard: 모든 Claude Code 세션이 한 명의 전사로 나타나는 로컬 2D 훈련장. 구조는 README의 Layout 절을 따른다.
 서버(`server/`)는 node:http만 쓰는 ESM, 페이지(`web/js/`)는 빌드 없는 ES 모듈, mod(`mod/arena-link`, settings.json에 경로로 등록)는 TypeScript 한 파일.
@@ -23,7 +23,7 @@ npm test        # 서버 단위 테스트 (server/arena.test.js), 새 로직에�
 npm run lint    # ESLint, 경고 0이어야 함
 ```
 
-페이지를 고쳤으면 headless Edge 스크립트(scratchpad의 load-check / remote-shot / tier-shot 류)로 콘솔 오류 0과 시나리오를 확인한다. 서버를 고쳤으면 4747 서버를 재시작하고 `/health`를 확인한다. 동작을 바꾸지 않는 리팩토링은 반드시 이 확인을 먼저 통과시킨 뒤 끝낸다.
+페이지를 고쳤으면 headless 브라우저(Chrome DevTools Protocol로 Edge/Chrome을 띄워 페이지를 열고 데모 전사를 넣는 스크립트)로 콘솔 오류 0과 시나리오를 확인한다. 서버를 고쳤으면 4747 서버를 재시작하고 `/health`를 확인한다. 동작을 바꾸지 않는 리팩토링은 반드시 이 확인을 먼저 통과시킨 뒤 끝낸다.
 
 ## 주기적 리팩토링
 

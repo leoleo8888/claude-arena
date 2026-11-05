@@ -1,7 +1,14 @@
-# bot-monitor — Gladiator Yard
+# claude-arena — Gladiator Yard
 
-A local website where every Claude Code session is a warrior training in a 2D yard.
-Sessions report events through a mod (`arena-link`, phase 2); this repo is the server and the page.
+Gladiator Yard is a zero-dependency local web page that turns your AI coding sessions into pixel-art gladiators in a
+Roman training ground. A Claude Code mod (and Codex hooks) report each session as it works — every tool call is a
+fight against that arena's cast, each finished turn ends in fireworks, XP and levels accumulate per project — and the
+page doubles as a remote: click a warrior to read the conversation, send a prompt or a slash command, rename the
+session, or raise its terminal window.
+
+> **Security note.** The server listens on 127.0.0.1 only and has no authentication. Anything running on your
+> machine can read your sessions' conversations through it and, for Claude sessions, send them prompts and slash
+> commands. Do not expose the port beyond localhost.
 
 ```
 npm start            # http://127.0.0.1:4747

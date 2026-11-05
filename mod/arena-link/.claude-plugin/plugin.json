@@ -1,5 +1,5 @@
 {
   "name": "arena-link",
   "version": "0.1.0",
-  "description": "Reports this session to the Gladiator Yard (bot-monitor) as a warrior: join, quests, fights per tool call, squires for subagents, vitals, leave. Starts the yard server when it is down."
+  "description": "Reports this session to the Gladiator Yard (claude-arena) as a warrior: join, quests, fights per tool call, squires for subagents, vitals, leave. Starts the yard server when it is down."
 }
