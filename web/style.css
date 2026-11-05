@@ -1,0 +1,79 @@
+:root {
+  --bg: #0f1115; --panel: #171b22; --line: #2b323c; --text: #e5e7eb; --dim: #8b95a3;
+  --ok: #7cf2a0; --warn: #ffd23f; --err: #ff4d4d; --hint: #b48cff; --hp: #5fd35f; --mp: #6aa6ff; --sp: #c080ff;
+}
+* { box-sizing: border-box }
+html, body { height: 100% }
+body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 ui-monospace, Consolas, "Cascadia Mono", monospace }
+#app { display: flex; flex-direction: column; height: 100% }
+
+/* header */
+header { display: flex; align-items: center; gap: 12px; padding: 8px 16px 6px }
+h1 { font-size: 16px; margin: 0; letter-spacing: .5px }
+.status { color: var(--dim) } .status.off { color: var(--err) }
+header .spacer { flex: 1 } header .count { color: var(--dim) }
+button.tg { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px; font: inherit; cursor: pointer }
+button.tg:hover { border-color: var(--dim) } button.tg.on { border-color: var(--warn); color: var(--warn) }
+
+/* stage and side panels */
+main { display: flex; flex: 1; min-height: 0; gap: 12px; padding: 0 16px 16px }
+#stage { flex: 1; min-width: 0; display: flex; align-items: flex-start; justify-content: center }
+canvas { width: 100%; max-width: 1120px; aspect-ratio: 16/9; image-rendering: pixelated; image-rendering: crisp-edges; background: #2a2520; border: 2px solid #3b332b; border-radius: 4px; display: block }
+aside { width: 310px; flex: none; display: flex; flex-direction: column; gap: 10px; min-height: 0 }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; overflow: hidden }
+.box h2 { font-size: 12px; margin: 0 0 6px; color: var(--dim); font-weight: normal; text-transform: uppercase; letter-spacing: 1px }
+.empty { color: var(--dim) }
+
+/* roster */
+#roster { max-height: 45%; overflow: auto }
+.w { padding: 6px 0; border-top: 1px solid var(--line) } .w:first-of-type { border-top: 0 }
+.w .n { display: flex; justify-content: space-between; gap: 8px; min-width: 0 }
+.w .n b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0 }
+.w .n small { color: var(--dim); white-space: nowrap; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis }
+.w .d { color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.w.resting { opacity: .5 } .w.training .n b { color: var(--warn) }
+.w[data-session] { cursor: pointer } .w[data-session]:hover .n b { text-decoration: underline }
+.bars { display: grid; grid-template-columns: 18px 1fr 36px; gap: 2px 6px; font-size: 11px; margin-top: 3px; align-items: center }
+.bar { height: 6px; background: #0b0e12; border-radius: 3px; overflow: hidden } .bar i { display: block; height: 100% }
+.hp i { background: var(--hp) } .mp i { background: var(--mp) } .sp i { background: var(--sp) } .xp i { background: var(--warn) }
+
+/* battle log */
+#log { flex: 1; min-height: 0; display: flex; flex-direction: column }
+#log ul { margin: 0; padding: 0; list-style: none; overflow: auto; flex: 1; font-size: 12px }
+#logTabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px }
+.tab { font: inherit; font-size: 11px; padding: 1px 8px; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--dim); cursor: pointer; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.tab:hover { border-color: var(--dim); color: var(--text) } .tab.on { color: var(--warn); border-color: var(--warn) } .tab i { font-style: normal; opacity: .7; margin-left: 4px }
+#log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--dim) } #log li b { color: var(--text); font-weight: normal }
+#log .success { color: var(--ok) } #log .error { color: var(--err) } #log .warning { color: var(--warn) } #log .suggestion { color: var(--hint) } #log .text { color: var(--text) }
+
+/* hall of fame */
+#ledger table { border-collapse: collapse; width: 100%; font-size: 11px; table-layout: fixed }
+#ledger td { padding: 1px 2px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+#ledger td:first-child { color: var(--text); width: 34% } #ledger td.r { text-align: right }
+
+/* the remote: a modal over the yard with one session's conversation and a prompt box */
+#remote { position: fixed; inset: 0; background: rgba(0, 0, 0, .62); display: flex; align-items: center; justify-content: center; z-index: 10 }
+#remote[hidden] { display: none }
+.rm { width: min(760px, 94vw); height: min(82vh, 720px); background: var(--panel); border: 1px solid var(--warn); border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0, 0, 0, .6) }
+.rm-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line) }
+.rm-head b { color: var(--warn) } .rm-head span { color: var(--dim); font-size: 12px; margin-left: 8px }
+.rm-head .lnk { background: none; border: 0; color: var(--dim); font: inherit; cursor: pointer; padding: 0 4px }
+.rm-head .lnk:hover { color: var(--warn) } .rm-head .lnk:disabled { visibility: hidden }
+#rmNameInput { background: #0b0e12; color: var(--text); border: 1px solid var(--warn); border-radius: 4px; padding: 2px 6px; font: inherit; width: 220px }
+#rmNameInput[hidden] { display: none }
+#rmRows { flex: 1; overflow: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px }
+.msg { max-width: 88%; padding: 6px 10px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; font-size: 12px; line-height: 1.5 }
+.msg.user { align-self: flex-end; background: #2b3340 } .msg.assistant { align-self: flex-start; background: #1f242c; border: 1px solid var(--line) }
+.msg.notice { align-self: center; color: var(--dim); font-size: 11px; background: transparent }
+.msg.remote { border: 1px dashed var(--warn) } .msg.failed { border-color: var(--err) }
+.msg .st { display: block; font-size: 10px; color: var(--dim); margin-top: 3px; text-align: right } .msg.failed .st { color: var(--err) }
+#rmTyping { color: var(--warn); font-size: 11px; padding: 0 14px 6px; min-height: 16px }
+.rm-foot { display: flex; gap: 8px; padding: 0 14px 12px }
+.rm-foot textarea { flex: 1; background: #0b0e12; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: inherit; resize: none }
+.rm-foot textarea:disabled, .rm-foot button:disabled { opacity: .5; cursor: default }
+
+@media (max-width: 900px) { main { flex-direction: column } aside { width: auto } #roster { max-height: none } }
+
+/* which CLI a session runs in */
+.w .n .agent { flex: none }
+.agent { font-style: normal; color: #3ddc84; border: 1px solid #3ddc84; border-radius: 8px; font-size: 10px; padding: 0 5px; margin-left: 6px; vertical-align: 1px }

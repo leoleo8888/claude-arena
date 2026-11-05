@@ -1,0 +1,23 @@
+{
+  "name": "bot-monitor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gladiator training yard: a local 2D arena where every Claude Code session is a warrior",
+  "type": "module",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node --test server/ codex-link/",
+    "demo": "node scripts/demo.mjs",
+    "lint": "eslint .",
+    "codex:install": "node scripts/codex-install.mjs",
+    "codex:e2e": "node codex-link/e2e.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0"
+  }
+}

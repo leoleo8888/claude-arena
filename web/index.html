@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gladiator Yard</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>⚔ Gladiator Yard</h1><span id="conn" class="status off">연결 중…</span>
+    <span class="spacer"></span><span id="count" class="count"></span>
+    <button id="sound" class="tg" title="효과음 켜기/끄기">🔇 sound</button>
+  </header>
+  <main>
+    <div id="stage"><canvas id="yard" width="1120" height="630"></canvas></div>
+    <aside>
+      <div class="box" id="roster"><h2>Warriors</h2><div id="rosterBody"><div style="color:var(--dim)">연습장이 비어 있습니다.</div></div></div>
+      <div class="box" id="log"><h2>Battle log</h2><div id="logTabs"></div><ul id="logBody"></ul></div>
+      <div class="box" id="ledger"><h2>Hall of fame</h2><div id="ledgerBody"></div></div>
+    </aside>
+  </main>
+</div>
+<div id="remote" hidden>
+  <div class="rm" role="dialog" aria-label="세션 원격">
+    <div class="rm-head"><div><b id="rmName"></b><button id="rmRename" class="lnk" title="세션 이름 바꾸기 (/rename)">✎</button><input id="rmNameInput" hidden maxlength="60" placeholder="새 세션 이름 · Enter 적용, Esc 취소"><span id="rmMeta"></span></div><div><button id="rmFocus" class="tg" title="이 세션이 열린 터미널 창을 앞으로 가져옵니다">🖥 터미널</button> <button id="rmClose" class="tg" title="닫기 (Esc)">✕</button></div></div>
+    <div id="rmRows"></div>
+    <div id="rmTyping"></div>
+    <div class="rm-foot"><textarea id="rmText" rows="2" placeholder="이 세션에 보낼 지시… (Enter 전송, Shift+Enter 줄바꿈)"></textarea><button id="rmSend" class="tg on">보내기</button></div>
+  </div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
