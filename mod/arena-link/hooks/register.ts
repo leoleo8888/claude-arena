@@ -3,7 +3,7 @@ import type { EngineInterface, Register } from 'claude-code'
 // Where the Gladiator Yard listens and where its checkout is, read once per session from the environment
 // (set them in settings.json's `env` next to CLAUDE_CODE_PLUGIN_DIRS):
 //   GLADIATOR_YARD_URL  default http://127.0.0.1:4747
-//   GLADIATOR_YARD_DIR  the bot-monitor folder; without it the mod reports to the yard but cannot start it
+//   GLADIATOR_YARD_DIR  the claude-arena folder; without it the mod reports to the yard but cannot start it
 const DEFAULT_URL = 'http://127.0.0.1:4747'
 const HEARTBEAT_MS = 5000
 const SPAWN_RETRY_MS = 20000
@@ -11,6 +11,7 @@ const QUEUE_MAX = 60
 const REMOTE_POLL_MS = 2000      // how often the yard's inbox is checked for prompts typed on the page
 const CHAT_DUMP_ROWS = 40        // how much of the transcript the page gets when the warrior joins
 const TITLE_MAX = 60
+const OUTPUT_MAX = 2000          // how much of a slash command's printed output the page gets
 
 type YardEvent = Record<string, unknown>
 
@@ -153,8 +154,9 @@ async function startServer($: EngineInterface): Promise<void> {
   state.lastSpawnAt = now
   try {
     // Detached from this session either way, so the yard outlives whichever session started it.
-    if (state.windows) await runPowerShell($, `Start-Process -FilePath node -ArgumentList 'server/server.js' -WorkingDirectory '${state.dir}' -WindowStyle Hidden`, 15000)
-    else await runShell($, `cd '${state.dir}' && nohup node server/server.js >/dev/null 2>&1 &`, 15000)
+    const dir = state.dir.replace(/'/g, "''")   // a quote in the path must not end the quoted argument
+    if (state.windows) await runPowerShell($, `Start-Process -FilePath node -ArgumentList 'server/server.js' -WorkingDirectory '${dir}' -WindowStyle Hidden`, 15000)
+    else await runShell($, `cd '${state.dir.replace(/'/g, "'\\''")}' && nohup node server/server.js >/dev/null 2>&1 &`, 15000)
     $.ui.log(`arena-link: started the yard server from ${state.dir}`, { to: 'debug' })
   } catch (err) {
     $.ui.log(`arena-link: could not start the yard server: ${String(err)}`, { to: 'debug' })
@@ -213,8 +215,19 @@ async function join($: EngineInterface): Promise<void> {
   state.queue = [joinEvent(), vitalsEvent()]
   await flush($)
   void dumpChat($)
+  void sendCommands($)
   void readTitle($)
   if (!state.terminal) void findTerminal($)
+}
+
+// The slash commands this session can run, for the page's autocomplete.
+async function sendCommands($: EngineInterface): Promise<void> {
+  try {
+    const commands = (await $.command.list()).map(c => ({ name: c.name, description: c.description ?? '' }))
+    post($, { type: 'commands', commands })
+  } catch (err) {
+    $.ui.log(`arena-link: could not list commands for the yard: ${String(err)}`, { to: 'debug' })
+  }
 }
 
 // ---------- the remote: the conversation goes to the yard, prompts typed on the page come back ----------
@@ -238,8 +251,21 @@ async function pollRemote($: EngineInterface): Promise<void> {
   try {
     const res = await $.http.fetch(`${state.url}/remote/${encodeURIComponent(state.session)}`)
     if (!res.ok) return
-    const { items } = JSON.parse(res.text) as { items?: Array<{ id: number; kind?: string; text: string }> }
+    const { items } = JSON.parse(res.text) as { items?: Array<{ id: number; kind?: string; text: string; command?: string; args?: string }> }
     for (const item of items ?? []) {
+      if (item.kind === 'command' && item.command) {
+        // A slash command typed on the page: the engine refuses it through prompt.submit and asks for command.run,
+        // which runs it as if the person typed it (once the session is idle); the printed output goes back as a notice.
+        $.ui.toast(`⚔ 원격 명령: /${item.command}`)
+        $.command.run({ command: item.command, args: item.args ?? '' })
+          .then(ran => {
+            post($, { type: 'remote.ack', id: item.id, state: 'sent' })
+            const text = cleanText(ran.text ?? '')
+            post($, { type: 'chat', role: 'notice', text: text !== '' ? `/${item.command} → ${text.slice(0, OUTPUT_MAX)}` : `/${item.command} 실행됨 (출력 없음: 터미널 화면에 나왔을 수 있습니다)` })
+          })
+          .catch(err => post($, { type: 'remote.ack', id: item.id, state: 'failed', error: String(err) }))
+        continue
+      }
       if (item.kind === 'rename') {
         // Runs as if the person typed `/rename <name>` (once the session is idle); our own command.run hook does
         // not hear a run we make, so read the recorded title back afterwards.
