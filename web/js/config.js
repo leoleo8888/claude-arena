@@ -17,6 +17,7 @@ export const LANE_DY = 72                                // the walking lane run
 export const POST_HIT = { left: -50, right: 140, top: -78, bottom: 80 }   // mouse hit box around a post, relative to its slot
 export const BOARD = { dx: -50, dy: -74, w: 190, h: 18 }                   // the scoreboard strip above a post
 export const BOARD_HIT_PAD = 3
+export const NIGHTFALL = { alpha: 0.62, easeMs: 450, color: '8, 10, 20' }   // a napping warrior's post goes dark, as if the lamps were put out
 
 // ---- timings (ms)
 export const NAP_MS = 10_000              // nothing to do for this long → the warrior lies down

@@ -1,6 +1,6 @@
 // The frame loop: blit the floor, crawl the scoreboards, draw every actor with its plate and effects, then the
 // canvas notes and the hover tooltip. Nothing here changes state except the actors' per-frame step.
-import { SCALE, TILE, COLOR, font, FRAME_MS, TICKER_PX_PER_MS, TICKER_COLOR, ENEMY_LABEL_AGE_MS, ENEMY_GROW_AGE_MS, ENEMY_DIE_MS } from './config.js'
+import { SCALE, TILE, COLOR, font, FRAME_MS, NIGHTFALL, POST_HIT, TICKER_PX_PER_MS, TICKER_COLOR, ENEMY_LABEL_AGE_MS, ENEMY_GROW_AGE_MS, ENEMY_DIE_MS } from './config.js'
 import { warriors, actors, latestLine, napping } from './store.js'
 import { layout, activeSlots, board } from './layout.js'
 import { THEMES } from './themes.js'
@@ -45,7 +45,7 @@ function drawFrame(now) {
   for (const actor of [...actors.values()].sort((a, b) => a.y - b.y)) {
     actor.step(dt, now)
     if (actor.dead) { actors.delete(actor.session); continue }
-    drawActor(actor, warriors.get(actor.session), now)
+    drawActor(actor, warriors.get(actor.session), now, dt)
   }
   if (actors.size === 0) drawEmptyNotice()
   drawFireworks(ctx, dt, now)
@@ -93,7 +93,7 @@ function drawBoardNote() {
   ctx.fillStyle = COLOR.gold; ctx.fillText(note.text, x + 8, b.y - 11)
 }
 
-function drawActor(actor, warrior, now) {
+function drawActor(actor, warrior, now, dt) {
   const pose = actor.currentPose(warrior, now)
   const frames = HERO[pose] || DRILLS[pose] || HERO.idle
   const frameIndex = frame % frames.length
@@ -114,8 +114,22 @@ function drawActor(actor, warrior, now) {
   if (mounted) drawMount(ctx, 'chariot', hx, actor.y + 14 * SCALE + rideBob, 12 * SCALE, SCALE, actor.facingLeft, rolling ? frame : 0, '#8a5a30', 'over')
   if (actor.enemy) drawEnemy(actor, pose, now)
   drawFightEffects(ctx, actor, now)
+  drawNightfall(actor, warrior, dt)
   if (warrior) drawNamePlate(actor, warrior, now)
   drawEffects(actor, now)
+}
+
+/** Lights out over a napping or resting warrior's post: an eased dark overlay and a small moon; the plate stays readable above it. */
+function drawNightfall(actor, warrior, dt) {
+  const dark = !!warrior && (warrior.status === 'resting' || napping(warrior)) && !actor.moving
+  actor.dim += ((dark ? 1 : 0) - actor.dim) * Math.min(1, dt / NIGHTFALL.easeMs)
+  if (actor.dim < 0.01) { actor.dim = 0; return }
+  const slot = actor.slot
+  ctx.fillStyle = `rgba(${NIGHTFALL.color}, ${(NIGHTFALL.alpha * actor.dim).toFixed(3)})`
+  ctx.fillRect(slot.x + POST_HIT.left, slot.y + POST_HIT.top, POST_HIT.right - POST_HIT.left, POST_HIT.bottom - POST_HIT.top)
+  ctx.globalAlpha = actor.dim; ctx.fillStyle = '#e8ecf2'; ctx.font = font(14); ctx.textAlign = 'right'
+  ctx.fillText('☾', slot.x + POST_HIT.right - 6, slot.y + POST_HIT.top + 36)
+  ctx.globalAlpha = 1
 }
 
 /** The enemy pops in, grows a little while a long tool call runs, and shrinks away when beaten. */

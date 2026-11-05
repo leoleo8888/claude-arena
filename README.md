@@ -173,7 +173,8 @@ over 20 s the monster grows), drill while the session thinks between calls (jump
 squats or pacing, picked at random every few seconds), flinch on a failed call, pose on a finished turn (and
 fireworks climb to the middle of the yard under a "퀘스트 완료 · name" banner, so a finished session is noticed
 from across the room), lie down for a nap after
-10 s with nothing to do (the server stamps `idleSince` on every warrior), sit when the session's heartbeat
+10 s with nothing to do (the server stamps `idleSince` on every warrior; the post goes dark under a small moon, as if the
+lamps were put out, and lights up again on the next prompt), sit when the session's heartbeat
 stops, and walk out on `leave`. Squires stand behind the warrior. A scoreboard above each post
 crawls its warrior's newest battle-log line right to left (green for wins, red for failures); a vacated
 post keeps the last line, dimmed, until the next warrior arrives. The side panels hold the roster

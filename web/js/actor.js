@@ -33,6 +33,7 @@ export class Actor {
     this.prev = snapshotOf(warrior)
     this.bob = Math.random() * 100
     this.drill = null; this.drillUntil = 0
+    this.dim = 0            // 0 lit … 1 dark, eased by the render loop while the warrior naps or rests
   }
 
   theme() { return THEMES[this.slot.theme] }
